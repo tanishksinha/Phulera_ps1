@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
+from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import time
@@ -54,9 +55,9 @@ SONG_METADATA = {}
 @app.post("/ingest/")
 async def ingest_audio(
     file: UploadFile = File(...),
-    song_id: str = None,
-    title: str = "Unknown Title",
-    artist: str = "Unknown Artist"
+    song_id: Optional[str] = Form(None),
+    title: str = Form("Unknown Title"),
+    artist: str = Form("Unknown Artist")
 ):
     """
     Ingests an audio file, extracts features, and adds it to the DB.
