@@ -2,18 +2,42 @@ import numpy as np
 import warnings
 import pickle
 import os
+import urllib.request
+from pathlib import Path
 
 # Suppress warnings from panns_inference
 warnings.filterwarnings("ignore")
 
+def ensure_panns_files():
+    # panns_inference relies on wget which breaks on Windows. We must download manually.
+    home_dir = str(Path.home())
+    panns_dir = os.path.join(home_dir, "panns_data")
+    os.makedirs(panns_dir, exist_ok=True)
+    
+    csv_path = os.path.join(panns_dir, "class_labels_indices.csv")
+    model_path = os.path.join(panns_dir, "Cnn14_mAP=0.431.pth")
+    
+    if not os.path.exists(csv_path):
+        print("Downloading PANNs CSV...")
+        urllib.request.urlretrieve("https://raw.githubusercontent.com/qiuqiangkong/audioset_tagging_cnn/master/metadata/class_labels_indices.csv", csv_path)
+    
+    if not os.path.exists(model_path):
+        print("Downloading PANNs Model (200MB+)... This might take a minute.")
+        urllib.request.urlretrieve("https://zenodo.org/record/3987831/files/Cnn14_mAP%3D0.431.pth", model_path)
+
 try:
+    ensure_panns_files()
     from panns_inference import AudioTagging
-    # Initialize the model globally so it's only loaded once.
-    # Set device to 'cuda' if GPU is available, else 'cpu'.
-    # We'll use CPU by default for broader compatibility unless configured otherwise.
     at = AudioTagging(checkpoint_path=None, device='cpu')
     MODEL_LOADED = True
 except ImportError:
+    print("Warning: panns_inference not installed. Neural matching disabled.")
+    at = None
+    MODEL_LOADED = False
+except Exception as e:
+    print(f"Error loading panns_inference model: {e}")
+    at = None
+    MODEL_LOADED = False
     print("Warning: panns_inference not installed. Neural matching disabled.")
     at = None
     MODEL_LOADED = False

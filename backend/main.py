@@ -113,7 +113,9 @@ async def identify_audio(file: UploadFile = File(...)):
         
         # --- Engine 1: Fingerprinting (Exact Match) ---
         query_hashes = fingerprint_audio(audio_data, sr)
+        print(f"DEBUG: Extracted {len(query_hashes)} query hashes.")
         best_match_id, match_count = db.match_hashes(query_hashes)
+        print(f"DEBUG: Fingerprint best match: {best_match_id} with {match_count} matches.")
         
         fingerprint_confidence = 0.0
         if match_count > 0:
@@ -123,6 +125,7 @@ async def identify_audio(file: UploadFile = File(...)):
         # --- Engine 2: Neural Embedding (Fuzzy Match / Fallback) ---
         emb = get_audio_embedding(audio_data, sr)
         best_neural_id, neural_confidence = neural_db.find_best_match(emb)
+        print(f"DEBUG: Neural best match: {best_neural_id} with confidence {neural_confidence}.")
         
         # Decide which engine to trust more
         # Fingerprint is usually more accurate if it finds a match (>0.3 confidence)
@@ -139,6 +142,9 @@ async def identify_audio(file: UploadFile = File(...)):
             final_confidence = neural_confidence
             engine_used = "neural"
             
+        print(f"DEBUG: final_id={final_id}, final_confidence={final_confidence}, engine_used={engine_used}")
+        print(f"DEBUG: Is final_id in SONG_METADATA? {final_id in SONG_METADATA if final_id else False}")
+
         if final_id and final_id in SONG_METADATA:
             metadata = SONG_METADATA[final_id]
             return {
