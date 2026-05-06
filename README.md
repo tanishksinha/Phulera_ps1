@@ -1,14 +1,17 @@
 # Audio Identification & Source Detection System
 
-An enterprise-grade, dual-engine audio identification system designed to scale to thousands of songs, handle heavy noise/distortion, and return real-time matches with high accuracy. 
+## Team Information
+- **Team Name**: Phulera
+- **Year**: 2nd year
+- **All-Female Team**: No
 
-Built for the **Code2Create Challenge – Round 2**.
+## Architecture Overview
+###Audio Identification & Source Detection System
 
----
+An enterprise-grade, dual-engine audio identification system designed to scale to thousands of songs, handle heavy noise/distortion, and return real-time matches with high accuracy.
+#### Describe your approach here. Keep it short and clear.
 
-## 🏗️ Core Architecture & Data Flow (Issue 16)
-
-This system uses a decoupled, microservice-style architecture. The frontend is built in Streamlit for rich visualization, communicating with an asynchronous FastAPI backend. 
+    This system uses a decoupled, microservice-style architecture. The frontend is built in Streamlit for rich visualization, communicating with an asynchronous FastAPI backend. 
 
 The core matching logic relies on a **Dual-Engine Pipeline**:
 1. **Engine 1: Exact Match Fingerprinting (Dejavu-style)**
@@ -22,18 +25,7 @@ The core matching logic relies on a **Dual-Engine Pipeline**:
 **Data Flow:**
 `Audio Snippet -> noisereduce preprocessing -> Engine 1 (Hash Lookup) -> Engine 2 (Fallback) -> JSON Result & Confidence`
 
----
-
-## 🗄️ Feature Storage Schema & Memory Optimization (Issues 2 & 15)
-
-The system currently employs an **In-Memory Inverted Index** for storing audio fingerprints.
-- **Storage Strategy**: A Python dictionary mapping `hash_value -> list[(song_id, absolute_time_offset)]`. 
-- **Scalability Trade-offs**: While an in-memory dictionary is $O(1)$ for extremely rapid retrieval (satisfying the low latency constraint), it is bounded by RAM. 
-- **Memory Optimization**: The hashes are shortened SHA-1 strings. For a dataset of a "few thousand songs", this comfortably fits within a standard 8GB RAM environment footprint. To scale to millions of songs, this dictionary schema is designed to be trivially swapped out for a distributed **Redis Hash Map** or a sharded **PostgreSQL** table without altering the core lookup logic.
-
----
-
-## 🚀 Setup & Execution Instructions (Issue 17)
+## Setup & Execution Instructions 
 
 ### 1. Environment Setup
 Install the necessary dependencies in a Python 3.9+ environment:
@@ -70,8 +62,15 @@ python scripts/evaluate_accuracy.py ./data/test_clips/ ground_truth.json
 
 ---
 
-## 🛡️ Key Handling Strategies
+Feature Extraction & Storage: We use librosa to transform audio into spectrograms, identifying local intensity peaks (the "constellation map"). These peaks are paired and hashed using a Dejavu-style algorithm. These fingerprints are stored in a high-speed Inverted Index (Python dictionary) mapping hash -> (song_id, offset). For persistence, the index is serialized to disk using binary pickle, allowing for instant loading on startup.
 
-* **Concurrency (Issue 10)**: The `/identify/` endpoint is an `async` FastAPI route served by Uvicorn (an ASGI server). This allows the system to handle multiple simultaneous audio queries without blocking the main event loop.
-* **Invalid Queries (Issue 12)**: The system inspects uploaded arrays. If the audio is completely silent (array of zeros) or less than 1 second long, it rejects the query with a `400 Bad Request` prior to wasting CPU cycles on feature extraction.
-* **Latency Tracking (Issue 13)**: The backend runs a middleware interceptor that calculates total processing time and injects it into the HTTP response header `X-Process-Time`, logging it to the console for telemetry.
+Matching Algorithm: We employ a Dual-Engine Pipeline:
+
+Engine 1 (Hash Lookup): We perform $O(1)$ lookups in our index. By calculating the time-delta between query and database hashes, we use a voting mechanism to find the most likely match.
+Engine 2 (Neural Fallback): If the hashes fail due to extreme distortion, we use PANNs (Pretrained Audio Neural Networks) to extract a 2048-dimensional acoustic embedding, comparing it against the database using Cosine Similarity.
+Scalability: The system is built on an Asynchronous FastAPI backend served by Uvicorn. This allows for high-concurrency, handling multiple simultaneous queries without blocking. The use of an Inverted Index ensures that lookup time remains nearly constant ($O(1)$) even as the dataset grows to thousands of songs.
+
+Latency & Accuracy: To ensure low latency, we rely on hash-based lookups which take milliseconds. For accuracy, we implement a noisereduce preprocessing layer on all incoming queries to strip background static. The system only returns a match if it exceeds a high-confidence threshold, falling back to the neural engine when acoustic similarity is the more reliable metric.
+
+
+**Note:** Please do not change the format or spelling of anything in this README. The fields are extracted using a script, so any changes to the structure or formatting may break the extraction process.
