@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+librosa
+noisereduce
+pydub
+panns_inference
+streamlit
+numpy
+scipy
+python-multipart
+soundfile
