@@ -41,6 +41,10 @@ venv.bak/
 temp_*/
 temp_query_*/
 
+# Databases
+data/db/
+*.pkl
+
 # IDE
 .vscode/
 .idea/
