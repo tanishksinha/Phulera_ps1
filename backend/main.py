@@ -1,7 +1,8 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
+import time
 
 # We'll use absolute imports assuming we run the server from the project root.
 from backend.services.audio_processing import load_and_preprocess_audio
@@ -17,6 +18,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    # Log latency for telemetry
+    print(f"[{request.method}] {request.url.path} - Latency: {process_time:.4f}s")
+    return response
 
 # In-memory storage for ingested songs
 # In a real system, this would be a database like PostgreSQL or MongoDB
@@ -76,6 +87,12 @@ async def identify_audio(file: UploadFile = File(...)):
             
         # Load and preprocess
         audio_data, sr = load_and_preprocess_audio(temp_path)
+        
+        # Issue 12: Handle Invalid Query Inputs
+        if len(audio_data) < sr * 1.0: # Less than 1 second
+            raise HTTPException(status_code=400, detail="Audio snippet too short. Must be at least 1 second.")
+        if np.max(np.abs(audio_data)) == 0:
+            raise HTTPException(status_code=400, detail="Audio snippet is completely silent.")
         
         # --- Engine 1: Fingerprinting (Exact Match) ---
         query_hashes = fingerprint_audio(audio_data, sr)
