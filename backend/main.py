@@ -76,7 +76,7 @@ async def ingest_audio(
         
         # 1. Fingerprinting
         hashes = fingerprint_audio(audio_data, sr)
-        metadata = {"title": title, "artist": artist}
+        metadata = {"title": title, "artist": artist, "filename": file.filename}
         SONG_METADATA[song_id] = metadata
         db.insert_song(song_id, metadata, hashes)
         
@@ -153,6 +153,7 @@ async def identify_audio(file: UploadFile = File(...)):
                 "song_id": final_id,
                 "title": metadata["title"],
                 "artist": metadata["artist"],
+                "filename": metadata.get("filename", "N/A"),
                 "confidence": final_confidence,
                 "engine": engine_used
             }

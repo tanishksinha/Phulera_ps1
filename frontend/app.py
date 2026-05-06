@@ -124,12 +124,13 @@ with tab1:
                     if result.get("match"):
                         st.success(f"Match Found! ({elapsed:.2f}s)")
                         
-                        col1, col2, col3 = st.columns(3)
+                        col1, col2, col3, col4 = st.columns(4)
                         col1.metric("Title", result.get("title"))
-                        col2.metric("Artist", result.get("artist"))
+                        col2.metric("Artist/Genre", result.get("artist"))
+                        col3.metric("Matched File", result.get("filename"))
                         
                         conf = result.get("confidence", 0) * 100
-                        col3.metric("Confidence", f"{conf:.1f}%")
+                        col4.metric("Confidence", f"{conf:.1f}%")
                         
                         st.info(f"Engine Used: **{result.get('engine').upper()}**")
                         
