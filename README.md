@@ -6,10 +6,12 @@
 - **All-Female Team**: No
 
 ## Architecture Overview
-###Audio Identification & Source Detection System
+
+#### Describe your approach here. Keep it short and clear.
+
+Audio Identification & Source Detection System
 
 An enterprise-grade, dual-engine audio identification system designed to scale to thousands of songs, handle heavy noise/distortion, and return real-time matches with high accuracy.
-#### Describe your approach here. Keep it short and clear.
 
     This system uses a decoupled, microservice-style architecture. The frontend is built in Streamlit for rich visualization, communicating with an asynchronous FastAPI backend. 
 
