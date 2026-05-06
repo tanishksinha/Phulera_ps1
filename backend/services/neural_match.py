@@ -70,3 +70,5 @@ class NeuralDB:
         return None, highest_sim
 
 neural_db = NeuralDB()
+
+# formatted

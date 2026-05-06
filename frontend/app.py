@@ -98,3 +98,5 @@ with tab2:
                         st.error(f"Error: {result.get('detail')}")
                 except Exception as e:
                     st.error(f"Error connecting to backend: {e}")
+
+# formatted

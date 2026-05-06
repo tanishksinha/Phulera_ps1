@@ -22,3 +22,5 @@ def load_and_preprocess_audio(file_path: str, target_sr: int = 22050) -> tuple[n
     except Exception as e:
         print(f"Error processing audio {file_path}: {e}")
         raise e
+
+# formatted

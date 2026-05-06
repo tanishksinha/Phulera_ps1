@@ -148,3 +148,5 @@ class FingerprintDB:
 
 # Global instance for our demo
 db = FingerprintDB()
+
+# formatted
