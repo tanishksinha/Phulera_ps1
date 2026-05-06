@@ -76,7 +76,7 @@ def bulk_ingest(directory_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bulk ingest an initial dataset of songs.")
     parser.add_argument("directory", help="Path to the directory containing audio files.")
-    args = parser.parse_argument()
+    args = parser.parse_args()
     
     # Check if API is running
     try:

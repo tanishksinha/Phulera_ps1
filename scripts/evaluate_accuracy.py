@@ -83,6 +83,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate identification accuracy.")
     parser.add_argument("directory", help="Path to the directory containing test audio snippets.")
     parser.add_argument("ground_truth", help="Path to JSON file with expected matches.")
-    args = parser.parse_argument()
+    args = parser.parse_args()
     
     evaluate_accuracy(args.directory, args.ground_truth)
