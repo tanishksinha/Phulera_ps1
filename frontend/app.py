@@ -4,7 +4,7 @@ import io
 import time
 
 # --- Configuration ---
-st.set_page_config(page_title="Antigravity Audio ID", page_icon="🎵", layout="wide")
+st.set_page_config(page_title="Audio ID System", page_icon="🎵", layout="wide")
 API_URL = "http://localhost:8000"
 
 # --- UI Styling ---
@@ -29,7 +29,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎵 Antigravity Audio ID System")
+st.title("🎵 Audio ID System")
 st.markdown("**Dual-Engine Audio Fingerprinting & Matching**")
 
 tab1, tab2 = st.tabs(["🔍 Identify Song", "📥 Ingest New Song"])

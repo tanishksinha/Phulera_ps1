@@ -8,7 +8,7 @@ from backend.services.audio_processing import load_and_preprocess_audio
 from backend.services.fingerprint import fingerprint_audio, db
 from backend.services.neural_match import get_audio_embedding, neural_db, cosine_similarity
 
-app = FastAPI(title="Antigravity Audio ID")
+app = FastAPI(title="Audio ID System")
 
 app.add_middleware(
     CORSMiddleware,
@@ -129,5 +129,5 @@ async def identify_audio(file: UploadFile = File(...)):
 
 @app.get("/")
 def health_check():
-    return {"status": "ok", "message": "Antigravity Audio ID System is running."}
+    return {"status": "ok", "message": "Audio ID System is running."}
 
