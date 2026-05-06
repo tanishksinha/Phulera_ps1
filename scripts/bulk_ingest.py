@@ -72,6 +72,17 @@ def bulk_ingest(directory_path: str):
     elapsed = time.time() - start_time
     print(f"--- Ingestion Complete ---")
     print(f"Successfully ingested {success_count}/{len(files_to_ingest)} files in {elapsed:.2f} seconds.")
+    
+    # Trigger database save
+    print("Saving database to disk...")
+    try:
+        save_response = requests.post(f"{API_URL}/save_db/")
+        if save_response.status_code == 200:
+            print("Database saved successfully!")
+        else:
+            print("Failed to save database.")
+    except Exception as e:
+        print(f"Error saving database: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bulk ingest an initial dataset of songs.")

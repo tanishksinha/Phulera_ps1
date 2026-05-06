@@ -1,5 +1,7 @@
 import numpy as np
 import warnings
+import pickle
+import os
 
 # Suppress warnings from panns_inference
 warnings.filterwarnings("ignore")
@@ -68,6 +70,17 @@ class NeuralDB:
         if highest_sim >= threshold:
             return best_match, highest_sim
         return None, highest_sim
+
+    def save_to_disk(self, filepath):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'wb') as f:
+            pickle.dump({'embeddings': self.embeddings}, f)
+
+    def load_from_disk(self, filepath):
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                data = pickle.load(f)
+                self.embeddings = data.get('embeddings', {})
 
 neural_db = NeuralDB()
 

@@ -1,6 +1,8 @@
 import librosa
 import numpy as np
 import hashlib
+import pickle
+import os
 from scipy.ndimage import maximum_filter
 from scipy.ndimage import generate_binary_structure, iterate_structure
 
@@ -145,6 +147,18 @@ class FingerprintDB:
                 best_match = song_id
                 
         return best_match, max_matches
+
+    def save_to_disk(self, filepath):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'wb') as f:
+            pickle.dump({'hash_table': self.hash_table, 'songs': self.songs}, f)
+
+    def load_from_disk(self, filepath):
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                data = pickle.load(f)
+                self.hash_table = data.get('hash_table', {})
+                self.songs = data.get('songs', {})
 
 # Global instance for our demo
 db = FingerprintDB()

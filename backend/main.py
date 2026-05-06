@@ -3,6 +3,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import time
+import pickle
 
 # We'll use absolute imports assuming we run the server from the project root.
 from backend.services.audio_processing import load_and_preprocess_audio
@@ -10,6 +11,22 @@ from backend.services.fingerprint import fingerprint_audio, db
 from backend.services.neural_match import get_audio_embedding, neural_db, cosine_similarity
 
 app = FastAPI(title="Audio ID System")
+
+DB_DIR = "data/db"
+FINGERPRINT_DB_PATH = os.path.join(DB_DIR, "fingerprints.pkl")
+NEURAL_DB_PATH = os.path.join(DB_DIR, "neural.pkl")
+METADATA_PATH = os.path.join(DB_DIR, "metadata.pkl")
+
+@app.on_event("startup")
+def load_databases():
+    print("Loading databases from disk...")
+    db.load_from_disk(FINGERPRINT_DB_PATH)
+    neural_db.load_from_disk(NEURAL_DB_PATH)
+    if os.path.exists(METADATA_PATH):
+        with open(METADATA_PATH, "rb") as f:
+            global SONG_METADATA
+            SONG_METADATA = pickle.load(f)
+    print(f"Loaded {len(SONG_METADATA)} songs.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -146,7 +163,17 @@ async def identify_audio(file: UploadFile = File(...)):
 
 @app.get("/")
 def health_check():
-    return {"status": "ok", "message": "Audio ID System is running."}
+    return {"status": "ok", "message": "Audio ID System is running.", "songs_indexed": len(SONG_METADATA)}
+
+@app.post("/save_db/")
+def save_database():
+    print("Saving databases to disk...")
+    os.makedirs(DB_DIR, exist_ok=True)
+    db.save_to_disk(FINGERPRINT_DB_PATH)
+    neural_db.save_to_disk(NEURAL_DB_PATH)
+    with open(METADATA_PATH, "wb") as f:
+        pickle.dump(SONG_METADATA, f)
+    return {"status": "success", "message": "Databases saved to disk."}
 
 
 # formatted
