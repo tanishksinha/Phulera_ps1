@@ -39,8 +39,9 @@ def bulk_ingest(directory_path: str):
     
     for file_path in files_to_ingest:
         filename = os.path.basename(file_path)
+        parent_dir = os.path.basename(os.path.dirname(file_path))
         title = filename
-        artist = "Unknown"
+        artist = parent_dir.capitalize() # Use folder name (e.g. Blues, Rock) as artist
         
         if HAS_TINYTAG:
             try:
